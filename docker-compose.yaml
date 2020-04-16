@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  database:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_USER: devboost_server
+      POSTGRES_DB: server_database
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  server:
+    build: .
+    ports:
+      - 3000:3000
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_USER: devboost_server
+      POSTGRES_DB: server_database
+    volumes:
+      - ./:/usr/src/app
+    depends_on:
+      - database
+
+volumes:
+  data:
