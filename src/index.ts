@@ -13,12 +13,12 @@ app.use(json());
 
 const router: Router = new Router();
 
-router.get('/', ctx => {
-    ctx.body = { msg: 'Hello, world!' };
+router.get('/', (ctx) => {
+  ctx.body = { msg: 'Hello, world!' };
 });
 
 app.use(router.routes()).use(router.allowedMethods());
 
 app.listen(3000, () => {
-    console.log('server running');
+  console.log('server running');
 });
