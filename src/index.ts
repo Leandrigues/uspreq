@@ -13,9 +13,14 @@ app.use(json());
 
 const router: Router = new Router();
 
-router.get('/', (ctx) => {
-  ctx.body = { msg: 'Hello, world!' };
+router.get('/requisitos', (ctx) => {
+  ctx.body = { msg: `Requisitos com query: ${ctx.query.term} ${ctx.query.depth}` };
 });
+
+router.get('/materias/:id', (ctx) => {
+  ctx.body = { msg: `Matéria: ${ctx.params.id}` };
+});
+
 
 app.use(router.routes()).use(router.allowedMethods());
 
