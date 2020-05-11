@@ -18,6 +18,7 @@ services:
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_USER: devboost_server
       POSTGRES_DB: server_database
+      POSTGRES_HOST: database
     volumes:
       - ./:/usr/src/app
     depends_on:
