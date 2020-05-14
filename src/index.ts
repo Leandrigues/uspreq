@@ -48,56 +48,62 @@ const router: Router = new Router();
 // };
 
 // router.get('/', async (ctx) => {
-  // const { db }: any = ctx;
-  // await db.query(`insert into disciplinas(codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link)
-  // values ('MAC0323', 'Blabla', 0, 0, '0', '')
-  // `);
-  // const response = await db.query(`select * from disciplinas`);
-  // ctx.body = { rows: response.rows };
+// const { db }: any = ctx;
+// await db.query(`insert into disciplinas(codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link)
+// values ('MAC0323', 'Blabla', 0, 0, '0', '')
+// `);
+// const response = await db.query(`select * from disciplinas`);
+// ctx.body = { rows: response.rows };
 // });
 
-function isValid(materia : any, ctx : Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>> ) : boolean {
+function verifySubject(materia: any): any {
   const response = {
-    error: ''
+    message: 'Matéria inserida com sucesso',
+    valid: true,
+  };
+
+  Object.keys(materia).forEach((item: any) => {
+    if (item === undefined) {
+      response.message =
+        'Matéria deve seguir o formato: {codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link}';
+      response.valid = false;
+    }
+  });
+
+  if (!response.valid) {
+    return response;
   }
 
-  if(!materia.codigo || !materia.nome || !materia.creditos_aula || !materia.creditos_trab || !materia.periodo_ideal || !materia.link) {
-    response.error = "Matéria deve seguir o formato: {codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link}";
-    return false;
+  if (materia.nome.length > 255) {
+    response.message = 'Nome de matéria inválido';
+    response.valid = false;
   }
 
-  if(materia.nome.length > 255) {
-    response.error = "Nome de matéria inválido";
-    return false;
+  if (materia.codigo.length != 7) {
+    response.message = 'Código de código inválido';
+    response.valid = false;
   }
 
-  if(materia.codigo.length != 7) {
-    response.error = "Código de código inválido";
-    return false;
+  if (typeof materia.creditos_aula != 'number') {
+    response.message = 'Créditos aula inválido';
+    response.valid = false;
   }
 
-  if(typeof(materia.creditos_aula) != "number") {
-    response.error = "Créditos aula inválido";
-    return false;
-  }  
-
-  if(typeof(materia.creditos_trabalho) != "number") {
-    response.error = "Créditos trabalho inválido";
-    return false;
-  }  
-
-  if(typeof(materia.periodo_ideal) != "string" || materia.periodo_ideal.length > 255) {
-    response.error = "Perído ideal inválido";
-    return false;
+  if (typeof materia.creditos_trab != 'number') {
+    response.message = 'Créditos trabalho inválido';
+    response.valid = false;
   }
 
-  if(typeof(materia.link) != "string" || materia.link.length > 255) {
-    response.error = "Link ideal inválido";
+  if (typeof materia.periodo_ideal != 'string' || materia.periodo_ideal.length > 255) {
+    response.message = 'Perído ideal inválido';
+    response.valid = false;
   }
 
-  ctx.body = response;
+  if (typeof materia.link != 'string' || materia.link.length > 255) {
+    response.message = 'Link ideal inválido';
+  }
 
-  return true;
+  return response;
 }
 
 router.get('/requisitos', (ctx) => {
@@ -106,24 +112,33 @@ router.get('/requisitos', (ctx) => {
   ctx.body = { db };
 });
 
-router.get('/materias/:id', (ctx) => {
-  ctx.body = { msg: `Matéria: ${ctx.params.id}` };
+router.get('/materias/:id', async (ctx) => {
+  const { db }: any = ctx;
+  const response = await db.query(`select * from disciplinas where id = ${ctx.params.id}`);
+  ctx.body = { rows: response.rows };
 });
 
 router.post('/materias', async (ctx) => {
   const { db }: any = ctx;
   const materia = ctx.request.body;
-
-  if(isValid(materia, ctx)) {
+  const response = verifySubject(materia);
+  if (response.valid) {
     const codigo = materia.codigo;
     const nome = materia.nome;
     const creditos_aula = materia.creditos_aula;
     const creditos_trab = materia.creditos_trab;
     const periodo_ideal = materia.periodo_ideal;
     const link = materia.link;
-    
-    await db.query(`insert into disciplinas(codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link)`);
+
+    try {
+      await db.query(
+        `insert into disciplinas(codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link) values ('${codigo}', '${nome}', ${creditos_aula}, ${creditos_trab}, '${periodo_ideal}', '${link}')`,
+      );
+    } catch (e) {
+      response.message = e;
+    }
   }
+  ctx.body = { msg: response.message };
 });
 
 router.put('/materias/:id', (ctx) => {
