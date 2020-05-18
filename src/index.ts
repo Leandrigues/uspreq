@@ -24,45 +24,18 @@ app.use(json());
 
 const router: Router = new Router();
 
-// const subject1 = {
-//   cod: 'ED2',
-//   pre: 'ED1',
-// };
-
-// const subject2 = {
-//   cod: 'ED1',
-//   pre: 'Intro',
-// };
-
-// const subjects = [subject1, subject2];
-
-// const f = (subjectCod: any, a: any) => {
-//   let i: number = 0;
-//   while (i < 2 || subjects[i].cod != subjectCod) {
-//     i++;
-//   }
-//   if (i != 2) {
-//     a.push(subjects[i].pre);
-//     f(subjects[i].pre, a); // arrumar pra varios pre requesitos
-//   }
-// };
-
-// router.get('/', async (ctx) => {
-// const { db }: any = ctx;
-// await db.query(`insert into disciplinas(codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link)
-// values ('MAC0323', 'Blabla', 0, 0, '0', '')
-// `);
-// const response = await db.query(`select * from disciplinas`);
-// ctx.body = { rows: response.rows };
-// });
-
 function verifySubject(materia: any): any {
   const response = {
     message: 'Matéria inserida com sucesso',
     valid: true,
   };
 
-  Object.keys(materia).forEach((item: any) => {
+  if (Object.keys(materia).length != 6) {
+        response.message = 'Matéria deve seguir o formato: {codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link}';
+        response.valid = false;
+  }
+  
+  Object.values(materia).forEach((item: any) => {
     if (item === undefined) {
       response.message =
         'Matéria deve seguir o formato: {codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link}';
@@ -115,7 +88,7 @@ router.get('/requisitos', (ctx) => {
 router.get('/materias/:id', async (ctx) => {
   const { db }: any = ctx;
   const response = await db.query(`select * from disciplinas where id = ${ctx.params.id}`);
-  ctx.body = { rows: response.rows };
+  ctx.body = response.rows[0] ;
 });
 
 router.post('/materias', async (ctx) => {

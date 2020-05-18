@@ -11,18 +11,20 @@ export class Disciplina {
   pais: Disciplina[];
   filhos: Disciplina[];
 
-  constructor(db: Client) {
+  constructor({ id, codigo, nome, creditos_aula, creditos_trab, link, periodo_ideal} : any) {
+    this.id = id;
     this.codigo = codigo;
+    this.nome = nome;
+    this.creditos_aula = creditos_aula;
+    this.creditos_trab = creditos_trab.
+    this.link = link;
+    this.periodo_ideal = periodo_ideal;
     this.pais = [];
     this.filhos = [];
   }
 
   async getAncestors(db: Client, depth: number) {
     const response = await db.query(`select prerequesito_id from distemprereq where disciplina_id = ${this.id}`);
-    response.rows.forEach((subject) => {
-    })
-
-    };
   }
 
   getDescendents(depth: number) {}
