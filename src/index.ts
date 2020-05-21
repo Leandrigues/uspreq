@@ -31,10 +31,11 @@ function verifySubject(materia: any): any {
   };
 
   if (Object.keys(materia).length != 6) {
-        response.message = 'Matéria deve seguir o formato: {codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link}';
-        response.valid = false;
+    response.message =
+      'Matéria deve seguir o formato: {codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link}';
+    response.valid = false;
   }
-  
+
   Object.values(materia).forEach((item: any) => {
     if (item === undefined) {
       response.message =
@@ -88,7 +89,7 @@ router.get('/requisitos', (ctx) => {
 router.get('/materias/:id', async (ctx) => {
   const { db }: any = ctx;
   const response = await db.query(`select * from disciplinas where id = ${ctx.params.id}`);
-  ctx.body = response.rows[0] ;
+  ctx.body = response.rows[0];
 });
 
 router.post('/materias', async (ctx) => {
@@ -120,9 +121,40 @@ router.put('/materias/:id', (ctx) => {
 
 app.use(router.routes()).use(router.allowedMethods());
 
+async function insertTests() {
+  try {
+    // await client.query(
+    //   "insert into disciplinas(codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link) values ('MAC0110', 'Intro a Comp', 4, 0, '1', 'link teste')",
+    // );
+    // await client.query(
+    //   "insert into disciplinas(codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link) values ('MAC0121', 'Estrutura de Dados 1', 4, 0, '2', 'link teste 2')",
+    // );
+    // await client.query("insert into prerequisitos(forca, codigo_curso) values (1, '710')");
+    // await client.query('insert into distemprereq(disciplina_id, prerequisito_id) values (1, 1)');
+    await client.query('insert into prereqcompdis(disciplina_id, prerequisito_id) values (2, 1)');
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+router.get('/test', async (ctx) => {
+  const { db }: any = ctx;
+  const subjects = await db.query('select * from disciplinas');
+  const prereq = await db.query('select * from prerequisitos');
+  const distemprereq = await db.query('select * from distemprereq');
+  const prereqcompdis = await db.query('select * from prereqcompdis');
+  ctx.body = {
+    subjects: subjects.rows,
+    prereq: prereq.rows,
+    distemprereq: distemprereq.rows,
+    prereqcompdis: prereqcompdis.rows,
+  };
+});
+
 async function bootstrap() {
   await initializeDB();
   await createTables();
+  await insertTests();
   app.context.db = client;
 
   app.listen(3000, () => {
