@@ -11,12 +11,12 @@ export class Disciplina {
   pais: Disciplina[];
   filhos: Disciplina[];
 
-  constructor({ id, codigo, nome, creditos_aula, creditos_trab, link, periodo_ideal} : any) {
+  constructor({ id, codigo, nome, creditos_aula, creditos_trab, link, periodo_ideal }: any) {
     this.id = id;
     this.codigo = codigo;
     this.nome = nome;
     this.creditos_aula = creditos_aula;
-    this.creditos_trab = creditos_trab.
+    this.creditos_trab = creditos_trab;
     this.link = link;
     this.periodo_ideal = periodo_ideal;
     this.pais = [];

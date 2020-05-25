@@ -98,10 +98,11 @@ function verifySubject(materia: any): any {
   };
 
   if (Object.keys(materia).length != 6) {
-        response.message = 'Matéria deve seguir o formato: {codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link}';
-        response.valid = false;
+    response.message =
+      'Matéria deve seguir o formato: {codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link}';
+    response.valid = false;
   }
-  
+
   Object.values(materia).forEach((item: any) => {
     if (item === undefined) {
       response.message =
@@ -156,7 +157,7 @@ router.get('/requisitos', (ctx) => {
 router.get('/materias/:id', async (ctx) => {
   const { db }: any = ctx;
   const response = await db.query(`select * from disciplinas where id = ${ctx.params.id}`);
-  ctx.body = response.rows[0] ;
+  ctx.body = response.rows[0];
 });
 
 router.post('/materias', async (ctx) => {
