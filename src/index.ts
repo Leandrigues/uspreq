@@ -16,6 +16,73 @@ async function initializeDB() {
   }
 }
 
+async function insertSeeds(db : any) {
+  const insertionDisc = 'INSERT into disciplinas(codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link) values ($1, $2, $3, $4, $5, $6)';
+  const insertionPre = 'INSERT into prerequisitos(forca, codigo_curso) values ($1, $2)';
+  const insertionPreDis = 'INSERT into $1(disciplina_id, prerequisito_id) values ($2, $3)'
+  let response = await db.query('SELECT * FROM disciplinas');
+  
+  console.log(response.rows)
+  if (response.rows.length === 0) {
+    try {
+      await db.query(insertionDisc, ['AAA1234', 'Matéria A', 1, 1, '5', 'link']);
+      await db.query(insertionDisc, ['BBB1234', 'Matéria B', 1, 1, '5', 'link']);
+      await db.query(insertionDisc, ['CCC1234', 'Matéria C', 1, 1, '5', 'link']);
+      await db.query(insertionDisc, ['DDD1234', 'Matéria D', 1, 1, '5', 'link']);
+      await db.query(insertionDisc, ['EEE1234', 'Matéria E', 1, 1, '5', 'link']);
+      await db.query(insertionDisc, ['FFF1234', 'Matéria F', 1, 1, '5', 'link']);
+    } catch(e) {
+      console.log(e)
+      process.exit(1);
+    }
+
+    response = await db.query('SELECT * FROM prerequisitos');
+    
+    if (response.rows.length === 0) {
+      try {
+        await db.query(insertionPre, [1, '710']);
+        await db.query(insertionPre, [2, '711']);
+        await db.query(insertionPre, [3, '712']);
+        await db.query(insertionPre, [4, '713']);
+        await db.query(insertionPre, [5, '714']);
+      } catch(e) {
+        console.log(e);
+        process.exit(1);
+      }
+    }
+
+    response = await db.query('SELECT * FROM DisTemPreReq');
+
+    if (response.rows.length === 0) {
+      try {
+        await db.query(insertionPreDis, ['DisTemPreReq', 1, 1]);
+        await db.query(insertionPreDis, ['DisTemPreReq', 1, 2]);
+        await db.query(insertionPreDis, ['DisTemPreReq', 2, 3]);
+        await db.query(insertionPreDis, ['DisTemPreReq', 5, 4]);
+        await db.query(insertionPreDis, ['DisTemPreReq', 6, 5]);
+      } catch(e) {
+        console.log(e);
+        process.exit(1);
+      }
+    }
+
+    response = await db.query('SELECT * FROM PreReqCompDis');
+
+    if (response.rows.length === 0) {
+      try {
+        await db.query(insertionPreDis, ['PreReqCompDis', 1, 4]);
+        await db.query(insertionPreDis, ['PreReqCompDis', 1, 5]);
+        await db.query(insertionPreDis, ['PreReqCompDis', 2, 1]);
+        await db.query(insertionPreDis, ['PreReqCompDis', 4, 3]);
+        await db.query(insertionPreDis, ['PreReqCompDis', 3, 2]);
+      } catch(e) {
+        console.log(e);
+        process.exit(1);
+      }
+    }
+  }
+}
+
 const app: Koa = new Koa();
 
 app.use(bodyparser());
@@ -81,8 +148,9 @@ function verifySubject(materia: any): any {
 
 router.get('/requisitos', (ctx) => {
   const { db }: any = ctx;
-  const term = ctx.query.term;
-  ctx.body = { db };
+  // const term = ctx.query.term;
+  const response : any = db.query("SELECT * FROM prerequisitos");
+  ctx.body = { response }
 });
 
 router.get('/materias/:id', async (ctx) => {
@@ -120,10 +188,14 @@ router.put('/materias/:id', (ctx) => {
 
 app.use(router.routes()).use(router.allowedMethods());
 
+
 async function bootstrap() {
   await initializeDB();
   await createTables();
+  
   app.context.db = client;
+
+  await insertSeeds(client);
 
   app.listen(3000, () => {
     console.log('server running');

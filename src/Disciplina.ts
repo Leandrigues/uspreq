@@ -24,6 +24,7 @@ export class Disciplina {
   }
 
   async getAncestors(db: Client, depth: number) {
+    select prerequisito_id
     const response = await db.query(`select prerequesito_id from distemprereq where disciplina_id = ${this.id}`);
   }
 
