@@ -147,15 +147,14 @@ function verifySubject(materia: any): any {
   return response;
 }
 
-router.get('/requisitos', (ctx) => {
+router.get('/requisitos', async (ctx) => {
   const { db }: any = ctx;
   const codigo = ctx.query.codigo;
-  db.query(`select * from disciplinas where codigo = '${codigo}'`).then((subject: any) => {
-    const subjectObject: Disciplina = new Disciplina(subject.rows[0]);
-    subjectObject.getAncestors(db, 1);
-    console.log(`subject.filhos = ${subjectObject.filhos}`);
-    ctx.body = subjectObject.filhos;
-  });
+  let subject = await db.query(`select * from disciplinas where codigo = '${codigo}'`)
+  const subjectObject: Disciplina = new Disciplina(subject.rows[0]);
+  await subjectObject.getAncestors(db, 1);
+  console.log(`subject.filhos = ${subjectObject.filhos}`);
+  ctx.body = subjectObject.filhos;
 });
 
 router.get('/materias/:id', async (ctx) => {
