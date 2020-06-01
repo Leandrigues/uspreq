@@ -9,9 +9,15 @@ export class Disciplina {
   link: string;
   periodo_ideal: string;
   pais: any[];
-  filhos: any[];
+  filhos: Disciplina[];
+  _forca: number|undefined;
+  _codigo_curso: string|undefined;
+  _pr_id: number|undefined; 
 
   constructor({ id, codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link }: any) {
+    this._forca = undefined;
+    this._codigo_curso = undefined;
+    this._pr_id = undefined;
     this.id = id;
     this.codigo = codigo;
     this.nome = nome;
@@ -23,30 +29,37 @@ export class Disciplina {
     this.filhos = [];
   }
 
-  async getAncestors(db: Client, depth: number) {
-    if (depth > 0) {
-      let preReqIdList = await db.query(`select prerequisito_id from distemprereq where disciplina_id = ${1}`);
-      let subIdList: any[] = [];
-      console.log(`response.rows = ${JSON.stringify(preReqIdList.rows)}`);
-      
-      preReqIdList.rows.forEach(async (preReq) => {
-        let subId = await db.query(`select disciplina_id from prereqcompdis where prerequisito_id = ${preReq.prerequisito_id}`)
-        console.log(`response2.rows = ${JSON.stringify(subId.rows)}`);
-        subIdList.push(subId.rows);
-        console.log(`subIds = ${JSON.stringify(subIdList)}`);
-        subIdList.forEach((subjectsIds: any) => {
-          let dispList: Disciplina[] = [];
+  set forca(forca : number) {
+    this._forca = forca;
+  }
 
-          subjectsIds.forEach(async (subject: any) => {
-            let subjects = await db.query(`select * from disciplinas where id = ${subject.disciplina_id}`)
-            console.log(`response3.rows = ${JSON.stringify(subjects.rows)}`);
-            let disp: Disciplina = new Disciplina(subjects.rows[0]);
-            dispList.push(disp);
-            console.log(JSON.stringify(this.filhos));
-          });
-          this.filhos.push(dispList);
-        });
-      });
+  set codigo_curso(codigo_curso : string) {
+    this._codigo_curso = codigo_curso;
+  }
+
+  set pr_id(pr_id : number) {
+    this._pr_id = pr_id;
+  }
+
+  async getAncestors(db: Client, depth: number = 1) {
+    if (depth <= 0) {
+      return;
     }
+    const subjects : Disciplina[] = []
+    const { rows } : any = await db.query(`SELECT dis.*, pr.forca, pr.codigo_curso, pr.id as pr_id
+    FROM distemprereq AS dtpr 
+    INNER JOIN prerequisitos AS pr ON dtpr.prerequisito_id = pr.id 
+    INNER JOIN prereqcompdis AS prcd ON prcd.prerequisito_id = pr.id 
+    INNER JOIN disciplinas as dis ON dis.id = prcd.disciplina_id 
+    WHERE dtpr.disciplina_id = $1`, [this.id]);
+
+    
+    this.filhos = rows.map((subject : any) => {
+      const discipline = new Disciplina(subject);
+      discipline.pr_id = subject.pr_id; 
+      discipline.forca = subject.forca; 
+      discipline.codigo_curso = subject.codigo_curso; 
+      return discipline;
+    })
   }
 }

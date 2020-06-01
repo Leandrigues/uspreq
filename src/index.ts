@@ -149,12 +149,12 @@ function verifySubject(materia: any): any {
 
 router.get('/requisitos', async (ctx) => {
   const { db }: any = ctx;
-  const codigo = ctx.query.codigo;
+  const codigo = ctx.query.termo;
   let subject = await db.query(`select * from disciplinas where codigo = '${codigo}'`)
   const subjectObject: Disciplina = new Disciplina(subject.rows[0]);
   await subjectObject.getAncestors(db, 1);
-  console.log(`subject.filhos = ${subjectObject.filhos}`);
-  ctx.body = subjectObject.filhos;
+  ctx.body = [ subjectObject ];
+  console.log(ctx.body);
 });
 
 router.get('/materias/:id', async (ctx) => {
