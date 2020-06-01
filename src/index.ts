@@ -3,6 +3,7 @@ import * as Router from 'koa-router';
 import * as bodyparser from 'koa-bodyparser';
 import * as logger from 'koa-logger';
 import * as json from 'koa-json';
+import * as cors from '@koa/cors';
 import { client } from './client';
 import { createTables } from './createTables';
 import { Disciplina } from './Disciplina';
@@ -88,6 +89,7 @@ const app: Koa = new Koa();
 app.use(bodyparser());
 app.use(logger());
 app.use(json());
+app.use(cors());
 
 const router: Router = new Router();
 
@@ -150,10 +152,10 @@ function verifySubject(materia: any): any {
 router.get('/requisitos', async (ctx) => {
   const { db }: any = ctx;
   const codigo = ctx.query.termo;
-  let subject = await db.query(`select * from disciplinas where codigo = '${codigo}'`)
+  let subject = await db.query(`select * from disciplinas where codigo = '${codigo}'`);
   const subjectObject: Disciplina = new Disciplina(subject.rows[0]);
   await subjectObject.getAncestors(db, 1);
-  ctx.body = [ subjectObject ];
+  ctx.body = [subjectObject];
   console.log(ctx.body);
 });
 
