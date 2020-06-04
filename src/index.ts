@@ -151,9 +151,9 @@ function verifySubject(materia: any): any {
 
 router.get('/requisitos', async (ctx) => {
   const { db }: any = ctx;
-  const code = ctx.query.termo;
+  const code = ctx.query.termo.toUpperCase();
   const depth = ctx.query.profundidade;
-  let subject = await db.query('select * from disciplinas where codigo = $1', [code]);
+  let subject = await db.query(`SELECT * FROM disciplinas WHERE codigo = $1`, [code]);
   const subjectObject: Disciplina = new Disciplina(subject.rows[0]);
   await subjectObject.getAncestors(db, depth);
   await subjectObject.getSuccessors(db, depth);

@@ -70,7 +70,7 @@ export class Disciplina {
       return;
     }
     const { rows }: any = await db.query(
-      `SELECT 
+      `SELECT dis.*, pr.forca, pr.codigo_curso, pr.id as pr_id
       FROM prereqcompdis AS prcd
       INNER JOIN prerequisitos AS pr ON prcd.prerequisito_id = pr.id
       INNER JOIN distemprereq AS dtpr ON pr.id = dtpr.prerequisito_id
@@ -78,6 +78,8 @@ export class Disciplina {
       WHERE prcd.disciplina_id = $1`,
       [this.id],
     );
+
+    console.log(JSON.stringify(rows));
 
     for (let subject of rows) {
       const discipline = new Disciplina(subject);
