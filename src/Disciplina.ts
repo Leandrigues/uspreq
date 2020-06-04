@@ -10,9 +10,9 @@ export class Disciplina {
   periodo_ideal: string;
   pais: any[];
   filhos: Disciplina[];
-  _forca: number|undefined;
-  _codigo_curso: string|undefined;
-  _pr_id: number|undefined; 
+  _forca: number | undefined;
+  _codigo_curso: string | undefined;
+  _pr_id: number | undefined;
 
   constructor({ id, codigo, nome, creditos_aula, creditos_trab, periodo_ideal, link }: any) {
     this._forca = undefined;
@@ -29,15 +29,15 @@ export class Disciplina {
     this.filhos = [];
   }
 
-  set forca(forca : number) {
+  set forca(forca: number) {
     this._forca = forca;
   }
 
-  set codigo_curso(codigo_curso : string) {
+  set codigo_curso(codigo_curso: string) {
     this._codigo_curso = codigo_curso;
   }
 
-  set pr_id(pr_id : number) {
+  set pr_id(pr_id: number) {
     this._pr_id = pr_id;
   }
 
@@ -45,21 +45,47 @@ export class Disciplina {
     if (depth <= 0) {
       return;
     }
-    const subjects : Disciplina[] = []
-    const { rows } : any = await db.query(`SELECT dis.*, pr.forca, pr.codigo_curso, pr.id as pr_id
-    FROM distemprereq AS dtpr 
-    INNER JOIN prerequisitos AS pr ON dtpr.prerequisito_id = pr.id 
-    INNER JOIN prereqcompdis AS prcd ON prcd.prerequisito_id = pr.id 
-    INNER JOIN disciplinas as dis ON dis.id = prcd.disciplina_id 
-    WHERE dtpr.disciplina_id = $1`, [this.id]);
+    const { rows }: any = await db.query(
+      `SELECT dis.*, pr.forca, pr.codigo_curso, pr.id as pr_id
+      FROM distemprereq AS dtpr 
+      INNER JOIN prerequisitos AS pr ON dtpr.prerequisito_id = pr.id 
+      INNER JOIN prereqcompdis AS prcd ON prcd.prerequisito_id = pr.id 
+      INNER JOIN disciplinas as dis ON dis.id = prcd.disciplina_id 
+      WHERE dtpr.disciplina_id = $1`,
+      [this.id],
+    );
 
-    
-    this.filhos = rows.map((subject : any) => {
+    for (let subject of rows) {
       const discipline = new Disciplina(subject);
-      discipline.pr_id = subject.pr_id; 
-      discipline.forca = subject.forca; 
-      discipline.codigo_curso = subject.codigo_curso; 
-      return discipline;
-    })
+      discipline.pr_id = subject.pr_id;
+      discipline.forca = subject.forca;
+      discipline.codigo_curso = subject.codigo_curso;
+      await discipline.getAncestors(db, depth - 1);
+      this.pais.push(discipline);
+    }
+  }
+
+  async getSuccessors(db: Client, depth: number = 1) {
+    if (depth <= 0) {
+      return;
+    }
+    const { rows }: any = await db.query(
+      `SELECT 
+      FROM prereqcompdis AS prcd
+      INNER JOIN prerequisitos AS pr ON prcd.prerequisito_id = pr.id
+      INNER JOIN distemprereq AS dtpr ON pr.id = dtpr.prerequisito_id
+      INNER JOIN disciplinas AS dis ON dtpr.disciplina_id = dis.id
+      WHERE prcd.disciplina_id = $1`,
+      [this.id],
+    );
+
+    for (let subject of rows) {
+      const discipline = new Disciplina(subject);
+      discipline.pr_id = subject.pr_id;
+      discipline.forca = subject.forca;
+      discipline.codigo_curso = subject.codigo_curso;
+      await discipline.getSuccessors(db, depth - 1);
+      this.filhos.push(discipline);
+    }
   }
 }

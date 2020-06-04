@@ -37,49 +37,49 @@ async function insertSeeds(db: any) {
       console.log(e);
       process.exit(1);
     }
+  }
 
-    response = await db.query('SELECT * FROM prerequisitos');
+  response = await db.query('SELECT * FROM prerequisitos');
 
-    if (response.rows.length === 0) {
-      try {
-        await db.query(insertionPre, [1, '710']);
-        await db.query(insertionPre, [2, '711']);
-        await db.query(insertionPre, [3, '712']);
-        await db.query(insertionPre, [4, '713']);
-      } catch (e) {
-        console.log(e);
-        process.exit(1);
-      }
+  if (response.rows.length === 0) {
+    try {
+      await db.query(insertionPre, [1, '710']);
+      await db.query(insertionPre, [2, '711']);
+      await db.query(insertionPre, [3, '712']);
+      await db.query(insertionPre, [4, '713']);
+    } catch (e) {
+      console.log(e);
+      process.exit(1);
     }
+  }
 
-    response = await db.query('SELECT * FROM DisTemPreReq');
+  response = await db.query('SELECT * FROM DisTemPreReq');
 
-    if (response.rows.length === 0) {
-      try {
-        await db.query(insertionDisTem, [1, 1]);
-        await db.query(insertionDisTem, [2, 2]);
-        await db.query(insertionDisTem, [5, 3]);
-        await db.query(insertionDisTem, [6, 4]);
-        2;
-      } catch (e) {
-        console.log(e);
-        process.exit(1);
-      }
+  if (response.rows.length === 0) {
+    try {
+      await db.query(insertionDisTem, [1, 1]);
+      await db.query(insertionDisTem, [2, 2]);
+      await db.query(insertionDisTem, [5, 3]);
+      await db.query(insertionDisTem, [6, 4]);
+      2;
+    } catch (e) {
+      console.log(e);
+      process.exit(1);
     }
+  }
 
-    response = await db.query('SELECT * FROM PreReqCompDis');
+  response = await db.query('SELECT * FROM PreReqCompDis');
 
-    if (response.rows.length === 0) {
-      try {
-        await db.query(insertionPreDis, [1, 3]);
-        await db.query(insertionPreDis, [1, 4]);
-        await db.query(insertionPreDis, [2, 1]);
-        await db.query(insertionPreDis, [3, 1]);
-        await db.query(insertionPreDis, [4, 2]);
-      } catch (e) {
-        console.log(e);
-        process.exit(1);
-      }
+  if (response.rows.length === 0) {
+    try {
+      await db.query(insertionPreDis, [1, 3]);
+      await db.query(insertionPreDis, [1, 4]);
+      await db.query(insertionPreDis, [2, 1]);
+      await db.query(insertionPreDis, [3, 1]);
+      await db.query(insertionPreDis, [4, 2]);
+    } catch (e) {
+      console.log(e);
+      process.exit(1);
     }
   }
 }
@@ -151,10 +151,12 @@ function verifySubject(materia: any): any {
 
 router.get('/requisitos', async (ctx) => {
   const { db }: any = ctx;
-  const codigo = ctx.query.termo;
-  let subject = await db.query(`select * from disciplinas where codigo = '${codigo}'`);
+  const code = ctx.query.termo;
+  const depth = ctx.query.profundidade;
+  let subject = await db.query('select * from disciplinas where codigo = $1', [code]);
   const subjectObject: Disciplina = new Disciplina(subject.rows[0]);
-  await subjectObject.getAncestors(db, 1);
+  await subjectObject.getAncestors(db, depth);
+  await subjectObject.getSuccessors(db, depth);
   ctx.body = [subjectObject];
   console.log(ctx.body);
 });
