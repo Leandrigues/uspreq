@@ -151,14 +151,29 @@ function verifySubject(materia: any): any {
 
 router.get('/requisitos', async (ctx) => {
   const { db }: any = ctx;
-  const code = ctx.query.termo.toUpperCase();
-  const depth = ctx.query.profundidade;
-  let subject = await db.query(`SELECT * FROM disciplinas WHERE codigo = $1`, [code]);
-  const subjectObject: Disciplina = new Disciplina(subject.rows[0]);
-  await subjectObject.getAncestors(db, depth);
-  await subjectObject.getSuccessors(db, depth);
-  ctx.body = [subjectObject];
-  console.log(ctx.body);
+  const term = ctx.query.termo.toUpperCase();
+  let depth = ctx.query.profundidade;
+  if (depth == 0) {
+    depth = 10;
+  }
+  let subjects = await db.query(
+    `
+    SELECT *
+    FROM disciplinas
+    WHERE codigo ILIKE $1
+    OR nome ILIKE $1`,
+    ['%' + term + '%'],
+  );
+  let result: Disciplina[] = [];
+
+  for (let subject of subjects.rows) {
+    const subjectObject: Disciplina = new Disciplina(subject);
+    await subjectObject.getAncestors(db, depth);
+    await subjectObject.getSuccessors(db, depth);
+    result.push(subjectObject);
+  }
+
+  ctx.body = result;
 });
 
 router.get('/materias/:id', async (ctx) => {

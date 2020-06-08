@@ -79,8 +79,6 @@ export class Disciplina {
       [this.id],
     );
 
-    console.log(JSON.stringify(rows));
-
     for (let subject of rows) {
       const discipline = new Disciplina(subject);
       discipline.pr_id = subject.pr_id;
