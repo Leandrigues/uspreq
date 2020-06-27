@@ -217,7 +217,7 @@ async function bootstrap() {
 
   app.context.db = client;
 
-  await insertSeeds(client);
+  // await insertSeeds(client);
 
   app.listen(3000, () => {
     console.log('server running');
