@@ -7,6 +7,7 @@ import * as cors from '@koa/cors';
 import { client } from './client';
 import { createTables } from './createTables';
 import { Disciplina } from './Disciplina';
+import { suggestionCrawler } from './suggestionsCrawler';
 
 async function initializeDB() {
   try {
@@ -207,6 +208,13 @@ router.post('/materias', async (ctx) => {
 
 router.put('/materias/:id', (ctx) => {
   ctx.body = { msg: `Materia editada` };
+});
+
+router.post('/sugestoes', async (ctx) => {
+  const { db }: any = ctx;
+  const suggestion = ctx.request.body;
+  const code = suggestion.codigo;
+  const course = suggestion.curso;
 });
 
 app.use(router.routes()).use(router.allowedMethods());

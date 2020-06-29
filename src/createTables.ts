@@ -32,9 +32,18 @@ create table if not exists prereqcompdis(
     prerequisito_id integer references prerequisitos(id)
 )`;
 
+const createTableSuggestions = `
+create table if not exists suggestions(
+    id serial primary key,
+    codigo varchar(7) unique,
+    curso varchar(255)
+)
+`;
+
 export async function createTables() {
   await client.query(createTableDisciplina);
   await client.query(createTablePreRequisitos);
   await client.query(createTableDisTemPreReq);
   await client.query(createTablePreReqCompDis);
+  await client.query(createTableSuggestions);
 }
