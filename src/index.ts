@@ -7,7 +7,10 @@ import * as cors from '@koa/cors';
 import { client } from './client';
 import { createTables } from './createTables';
 import { Disciplina } from './Disciplina';
-import { suggestionCrawler } from './suggestionsCrawler';
+// import { suggestionCrawler } from './suggestionsCrawler';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { initializeNeo4j, neo4jRouter } from './neo4j';
 
 async function initializeDB() {
   try {
@@ -219,9 +222,23 @@ router.post('/sugestoes', async (ctx) => {
 
 app.use(router.routes()).use(router.allowedMethods());
 
+async function insertData(neo4j: any) {
+  const query: string = readFileSync(resolve('.', 'src', 'db.cypher')).toString();
+
+  await neo4j.run('MATCH (n) DETACH DELETE n');
+  await neo4j.run(query);
+}
+
+app.use(neo4jRouter.routes()).use(neo4jRouter.allowedMethods());
+
 async function bootstrap() {
   await initializeDB();
   await createTables();
+
+  const neo4j = initializeNeo4j();
+
+  app.context.neo4j = neo4j;
+  await insertData(neo4j);
 
   app.context.db = client;
 

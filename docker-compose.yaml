@@ -1,6 +1,16 @@
 version: '3.7'
 
 services:
+  neo4j:
+    image: neo4j:4.1.0
+    environment:
+      NEO4J_AUTH: none
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - graph:/data
+
   database:
     image: postgres:12-alpine
     environment:
@@ -9,6 +19,8 @@ services:
       POSTGRES_DB: server_database
     volumes:
       - data:/var/lib/postgresql/data
+    depends_on:
+      - neo4j
 
   server:
     build: .
@@ -23,6 +35,8 @@ services:
       - ./:/usr/src/app
     depends_on:
       - database
+      - neo4j
 
 volumes:
   data:
+  graph:

@@ -22,6 +22,7 @@
     "koa-json": "^2.0.2",
     "koa-logger": "^3.2.1",
     "koa-router": "^8.0.8",
+    "neo4j-driver": "^4.1.0",
     "node-fetch": "^2.6.0",
     "pg": "^8.1.0"
   },
