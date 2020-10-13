@@ -2,12 +2,19 @@ import { driver, session, Driver, Session } from 'neo4j-driver';
 import * as Router from 'koa-router';
 import { Context, Next } from 'koa';
 
-export function initializeNeo4j(): Session {
-  const conn: Driver = driver('bolt://neo4j');
-  return conn.session({
-    database: 'neo4j',
-    defaultAccessMode: session.WRITE,
-  });
+export function initializeNeo4j(): Session | any {
+  try {
+    const conn: Driver = driver('bolt://neo4j');
+    const neo4j = conn.session({
+      database: 'neo4j',
+      defaultAccessMode: session.WRITE,
+    });
+    console.log('Database is running');
+    return neo4j;
+  } catch(e) {
+    console.log('ERROR on connecting to Neo4J');
+    return;
+  }
 }
 
 type RouteCallback = (context: Context, next: Next) => Promise<void>;
