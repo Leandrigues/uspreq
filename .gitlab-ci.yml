@@ -6,7 +6,7 @@ cache:
     - node_modules/
 
 deploy:
-  stage: prod
+  stage: deploy
   image: rastasheep/ubuntu-sshd
   before_script:
     - touch AWS_USPREQ.pem
