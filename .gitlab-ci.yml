@@ -8,7 +8,7 @@ cache:
 prod:
   stage: prod
   image: rastasheep/ubuntu-sshd
-  before_script: 
+  before_script:
     - touch AWS_USPREQ.pem
     - echo "$DEPLOY_KEY" > AWS_USPREQ.pem
   script:
