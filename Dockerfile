@@ -13,4 +13,4 @@ COPY . ./
 
 EXPOSE ${PORT}
 
-CMD yarn dev
+CMD sleep 20 && yarn dev
