@@ -186,3 +186,9 @@ function gather(results: any[]): any {
 }
 
 neo4jRouter.get('/requisitos', getRequisitos);
+
+const hello: RouteCallback = async (ctx: Context): Promise<void> => {
+  ctx.body = 'Hello!'
+
+}
+neo4jRouter.get('/hello', hello);
